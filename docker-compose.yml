@@ -1,0 +1,54 @@
+services:
+  MySQL:
+    image: docker.io/colinbradshaw/utopia_db
+    healthcheck:
+      test: "mysqladmin ping --silent"
+      interval: "5s"
+    ports:
+      - "3306:3306"
+    security_opt:
+    - seccomp:unconfined
+    networks:
+      - utopia_nw
+        
+  user:
+    image: docker.io/colinbradshaw/user_microservice
+    depends_on:
+      MySQL:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - DB-LOC=jdbc:mysql://MySQL:3306/utopia
+    networks:
+      - utopia_nw
+        
+  booking:
+    image: docker.io/colinbradshaw/booking_microservice
+    depends_on:
+      MySQL:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      - DB-LOC=jdbc:mysql://MySQL:3306/utopia
+    networks:
+      - utopia_nw
+        
+  flight:
+    image: docker.io/colinbradshaw/flight_microservice
+    depends_on:
+      MySQL:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      - DB-LOC=jdbc:mysql://MySQL:3306/utopia
+    networks:
+        - utopia_nw
+        
+
+
+networks:
+  utopia_nw:
+
